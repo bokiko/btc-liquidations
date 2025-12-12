@@ -1,11 +1,25 @@
 'use client';
 
-import { Liquidation } from '@/types';
+import { Liquidation, Exchange } from '@/types';
 import { format } from 'date-fns';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
 interface LiquidationFeedProps {
   liquidations: Liquidation[];
+}
+
+function ExchangeBadge({ exchange }: { exchange: Exchange }) {
+  const styles: Record<Exchange, string> = {
+    Binance: 'bg-yellow-500/10 text-yellow-500',
+    Bybit: 'bg-orange-500/10 text-orange-500',
+    OKX: 'bg-zinc-700/50 text-zinc-300',
+  };
+
+  return (
+    <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${styles[exchange]}`}>
+      {exchange}
+    </span>
+  );
 }
 
 export default function LiquidationFeed({ liquidations }: LiquidationFeedProps) {
@@ -23,7 +37,9 @@ export default function LiquidationFeed({ liquidations }: LiquidationFeedProps) 
             <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse" />
           </div>
           <p className="text-zinc-400 mb-1">Waiting for liquidations...</p>
-          <p className="text-zinc-600 text-sm">Events over $10K threshold will appear here</p>
+          <p className="text-zinc-600 text-sm">
+            Monitoring Binance, Bybit & OKX
+          </p>
         </div>
       </div>
     );
@@ -41,44 +57,45 @@ export default function LiquidationFeed({ liquidations }: LiquidationFeedProps) 
         {liquidations.map((liq, index) => (
           <div
             key={liq.id}
-            className={`flex items-center gap-4 p-4 border-b border-zinc-800/50 last:border-0
+            className={`flex items-center gap-3 p-3 border-b border-zinc-800/50 last:border-0
               ${index === 0 ? 'bg-zinc-800/30 animate-pulse-once' : ''}`}
           >
             {/* Side Indicator */}
             <div
-              className={`w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0
+              className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0
                 ${liq.side === 'Long' ? 'bg-red-500/10' : 'bg-green-500/10'}`}
             >
               {liq.side === 'Long' ? (
-                <TrendingDown className="w-5 h-5 text-red-500" />
+                <TrendingDown className="w-4 h-4 text-red-500" />
               ) : (
-                <TrendingUp className="w-5 h-5 text-green-500" />
+                <TrendingUp className="w-4 h-4 text-green-500" />
               )}
             </div>
 
             {/* Details */}
             <div className="flex-1 min-w-0">
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-0.5">
+                <ExchangeBadge exchange={liq.exchange} />
                 <span
-                  className={`text-sm font-medium ${
+                  className={`text-xs font-medium ${
                     liq.side === 'Long' ? 'text-red-400' : 'text-green-400'
                   }`}
                 >
-                  {liq.side} Liquidated
+                  {liq.side}
                 </span>
-                <span className="text-xs text-zinc-600">
+                <span className="text-[10px] text-zinc-600">
                   {format(liq.timestamp, 'HH:mm:ss')}
                 </span>
               </div>
-              <p className="text-xs text-zinc-500">
+              <p className="text-[11px] text-zinc-500 truncate">
                 {liq.quantity.toFixed(4)} BTC @ ${liq.price.toLocaleString()}
               </p>
             </div>
 
             {/* Value */}
-            <div className="text-right">
+            <div className="text-right flex-shrink-0">
               <p
-                className={`text-lg font-semibold ${
+                className={`text-base font-semibold ${
                   liq.side === 'Long' ? 'text-red-400' : 'text-green-400'
                 }`}
               >

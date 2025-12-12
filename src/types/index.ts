@@ -1,5 +1,8 @@
+export type Exchange = 'Binance' | 'Bybit' | 'OKX';
+
 export interface Liquidation {
   id: string;
+  exchange: Exchange;
   symbol: string;
   side: 'Long' | 'Short';
   quantity: number;
@@ -8,13 +11,13 @@ export interface Liquidation {
   timestamp: Date;
 }
 
-export interface LiquidationStats {
-  totalLongs: number;
-  totalShorts: number;
+export interface ExchangeStats {
+  exchange: Exchange;
+  longCount: number;
+  shortCount: number;
   longValue: number;
   shortValue: number;
-  lastHourLongs: number;
-  lastHourShorts: number;
+  isConnected: boolean;
 }
 
 export interface ChartDataPoint {
@@ -22,3 +25,9 @@ export interface ChartDataPoint {
   longs: number;
   shorts: number;
 }
+
+export const EXCHANGE_COLORS: Record<Exchange, string> = {
+  Binance: '#F0B90B',
+  Bybit: '#F7A600',
+  OKX: '#000000',
+};
