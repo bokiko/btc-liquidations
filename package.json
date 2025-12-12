@@ -1,7 +1,17 @@
 {
   "name": "btc-liquidations",
-  "version": "0.1.0",
-  "private": true,
+  "version": "1.0.0",
+  "description": "Real-time Bitcoin liquidation monitor across major exchanges",
+  "author": {
+    "name": "bokiko",
+    "url": "https://github.com/bokiko"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/bokiko/btc-liquidations"
+  },
+  "license": "MIT",
+  "private": false,
   "scripts": {
     "dev": "next dev",
     "build": "next build",

@@ -155,6 +155,15 @@ export default function Dashboard() {
                 <Zap className="w-4 h-4 text-orange-500" />
               </div>
               <span className="text-sm font-medium text-zinc-400">BTC Liquidations</span>
+              <span className="text-zinc-700">·</span>
+              <a
+                href="https://github.com/bokiko"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-xs text-zinc-600 hover:text-zinc-400 transition-colors"
+              >
+                by bokiko
+              </a>
             </div>
             <p className="text-xs text-zinc-600">
               Real-time data from Binance, Bybit, OKX, Hyperliquid & Aevo. Not financial advice.
