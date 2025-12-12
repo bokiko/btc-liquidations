@@ -27,7 +27,7 @@ export default function Dashboard() {
               </div>
               <div>
                 <h1 className="text-lg font-semibold text-white">BTC Liquidations</h1>
-                <p className="text-xs text-zinc-500">Binance · Bybit · OKX</p>
+                <p className="text-xs text-zinc-500">Binance · Bybit · OKX · Hyperliquid · Aevo</p>
               </div>
             </div>
 
@@ -127,7 +127,7 @@ export default function Dashboard() {
       <footer className="border-t border-zinc-800/50 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 py-6">
           <p className="text-center text-xs text-zinc-600">
-            Real-time data from Binance, Bybit & OKX Futures. Not financial advice.
+            Real-time data from Binance, Bybit, OKX, Hyperliquid & Aevo. Not financial advice.
           </p>
         </div>
       </footer>

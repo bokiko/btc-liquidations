@@ -1,6 +1,6 @@
 'use client';
 
-import { Liquidation, Exchange } from '@/types';
+import { Liquidation, Exchange, EXCHANGE_STYLES } from '@/types';
 import { format } from 'date-fns';
 import { TrendingUp, TrendingDown } from 'lucide-react';
 
@@ -9,14 +9,8 @@ interface LiquidationFeedProps {
 }
 
 function ExchangeBadge({ exchange }: { exchange: Exchange }) {
-  const styles: Record<Exchange, string> = {
-    Binance: 'bg-yellow-500/10 text-yellow-500',
-    Bybit: 'bg-orange-500/10 text-orange-500',
-    OKX: 'bg-zinc-700/50 text-zinc-300',
-  };
-
   return (
-    <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded ${styles[exchange]}`}>
+    <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded border ${EXCHANGE_STYLES[exchange]}`}>
       {exchange}
     </span>
   );
@@ -38,7 +32,7 @@ export default function LiquidationFeed({ liquidations }: LiquidationFeedProps) 
           </div>
           <p className="text-zinc-400 mb-1">Waiting for liquidations...</p>
           <p className="text-zinc-600 text-sm">
-            Monitoring Binance, Bybit & OKX
+            Monitoring 5 exchanges
           </p>
         </div>
       </div>

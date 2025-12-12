@@ -1,6 +1,6 @@
 'use client';
 
-import { Liquidation, Exchange } from '@/types';
+import { Liquidation, Exchange, EXCHANGE_STYLES } from '@/types';
 import { TrendingUp, TrendingDown, Activity, DollarSign } from 'lucide-react';
 
 interface StatsCardsProps {
@@ -96,14 +96,16 @@ export default function StatsCards({ liquidations }: StatsCardsProps) {
 
       {/* Exchange Breakdown */}
       {Object.keys(byExchange).length > 0 && (
-        <div className="flex flex-wrap gap-3">
+        <div className="flex flex-wrap gap-2">
           {Object.entries(byExchange).map(([exchange, data]) => (
             <div
               key={exchange}
-              className="flex items-center gap-3 px-3 py-2 bg-zinc-900/30 border border-zinc-800/50 rounded-lg"
+              className="flex items-center gap-2 px-3 py-1.5 bg-zinc-900/30 border border-zinc-800/50 rounded-lg"
             >
-              <ExchangeBadge exchange={exchange as Exchange} />
-              <div className="text-sm">
+              <span className={`px-1.5 py-0.5 text-[10px] font-medium rounded border ${EXCHANGE_STYLES[exchange as Exchange]}`}>
+                {exchange}
+              </span>
+              <div className="text-xs">
                 <span className="text-zinc-400">{data.count}</span>
                 <span className="text-zinc-600 mx-1">·</span>
                 <span className="text-zinc-500">{formatValue(data.value)}</span>
@@ -113,19 +115,5 @@ export default function StatsCards({ liquidations }: StatsCardsProps) {
         </div>
       )}
     </div>
-  );
-}
-
-function ExchangeBadge({ exchange }: { exchange: Exchange }) {
-  const colors: Record<Exchange, string> = {
-    Binance: 'bg-yellow-500/10 text-yellow-500 border-yellow-500/20',
-    Bybit: 'bg-orange-500/10 text-orange-500 border-orange-500/20',
-    OKX: 'bg-zinc-500/10 text-zinc-300 border-zinc-500/20',
-  };
-
-  return (
-    <span className={`px-2 py-0.5 text-xs font-medium rounded border ${colors[exchange]}`}>
-      {exchange}
-    </span>
   );
 }

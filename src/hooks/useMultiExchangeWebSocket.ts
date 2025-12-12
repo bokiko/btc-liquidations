@@ -1,16 +1,10 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Liquidation, Exchange } from '@/types';
+import { Liquidation, Exchange, ExchangeConnection } from '@/types';
 
 const MAX_LIQUIDATIONS = 200;
 const RECONNECT_DELAY = 3000;
-
-interface ExchangeConnection {
-  exchange: Exchange;
-  isConnected: boolean;
-  error: string | null;
-}
 
 interface WebSocketConfig {
   exchange: Exchange;
@@ -20,6 +14,7 @@ interface WebSocketConfig {
 }
 
 const EXCHANGES: WebSocketConfig[] = [
+  // Binance Futures
   {
     exchange: 'Binance',
     url: 'wss://fstream.binance.com/ws/btcusdt@forceOrder',
@@ -46,6 +41,7 @@ const EXCHANGES: WebSocketConfig[] = [
       };
     },
   },
+  // Bybit
   {
     exchange: 'Bybit',
     url: 'wss://stream.bybit.com/v5/public/linear',
@@ -85,6 +81,7 @@ const EXCHANGES: WebSocketConfig[] = [
       };
     },
   },
+  // OKX
   {
     exchange: 'OKX',
     url: 'wss://ws.okx.com:8443/ws/v5/public',
@@ -124,6 +121,106 @@ const EXCHANGES: WebSocketConfig[] = [
       };
     },
   },
+  // Hyperliquid - Subscribe to all trades and filter for liquidations
+  {
+    exchange: 'Hyperliquid',
+    url: 'wss://api.hyperliquid.xyz/ws',
+    subscribe: {
+      method: 'subscribe',
+      subscription: { type: 'allMids' }, // We'll also subscribe to trades
+    },
+    parse: (data: unknown, threshold: number) => {
+      const msg = data as {
+        channel?: string;
+        data?: {
+          coin?: string;
+          side?: string;
+          px?: string;
+          sz?: string;
+          time?: number;
+          liquidation?: boolean;
+          startPosition?: boolean;
+          dir?: string;
+          closedPnl?: string;
+        };
+      };
+
+      // Check if it's a fill with liquidation
+      if (!msg.data || !msg.data.liquidation) return null;
+      if (!msg.data.coin?.toUpperCase().includes('BTC')) return null;
+
+      const quantity = parseFloat(msg.data.sz || '0');
+      const price = parseFloat(msg.data.px || '0');
+      const valueUsd = quantity * price;
+
+      if (valueUsd < threshold) return null;
+
+      // Determine side based on direction
+      const isLong = msg.data.side === 'A' || msg.data.dir?.includes('Long');
+
+      return {
+        id: `hl-${msg.data.time}-${Math.random().toString(36).substr(2, 9)}`,
+        exchange: 'Hyperliquid',
+        symbol: msg.data.coin || 'BTC',
+        side: isLong ? 'Long' : 'Short',
+        quantity,
+        price,
+        valueUsd,
+        timestamp: new Date(msg.data.time || Date.now()),
+      };
+    },
+  },
+  // Aevo - Subscribe to trades and filter liquidations
+  {
+    exchange: 'Aevo',
+    url: 'wss://ws.aevo.xyz',
+    subscribe: {
+      op: 'subscribe',
+      data: ['orderbook:BTC-PERP'],
+    },
+    parse: (data: unknown, threshold: number) => {
+      const msg = data as {
+        channel?: string;
+        data?: {
+          instrument_name?: string;
+          trades?: Array<{
+            side: string;
+            price: string;
+            amount: string;
+            timestamp: number;
+            is_liquidation?: boolean;
+            trade_id: string;
+          }>;
+        };
+      };
+
+      // Check for trade updates with liquidation flag
+      if (!msg.data?.trades) return null;
+
+      for (const trade of msg.data.trades) {
+        if (!trade.is_liquidation) continue;
+
+        const quantity = parseFloat(trade.amount);
+        const price = parseFloat(trade.price);
+        const valueUsd = quantity * price;
+
+        if (valueUsd < threshold) continue;
+
+        return {
+          id: `aevo-${trade.trade_id}-${Math.random().toString(36).substr(2, 9)}`,
+          exchange: 'Aevo',
+          symbol: msg.data.instrument_name || 'BTC-PERP',
+          side: trade.side === 'sell' ? 'Long' : 'Short',
+          quantity,
+          price,
+          valueUsd,
+          timestamp: new Date(trade.timestamp),
+        };
+      }
+
+      return null;
+    },
+  },
 ];
 
 export function useMultiExchangeWebSocket(threshold: number = 10000) {
@@ -134,6 +231,12 @@ export function useMultiExchangeWebSocket(threshold: number = 10000) {
 
   const wsRefs = useRef<Map<Exchange, WebSocket>>(new Map());
   const reconnectTimeouts = useRef<Map<Exchange, NodeJS.Timeout>>(new Map());
+  const thresholdRef = useRef(threshold);
+
+  // Keep threshold ref updated
+  useEffect(() => {
+    thresholdRef.current = threshold;
+  }, [threshold]);
 
   const updateConnection = useCallback((exchange: Exchange, updates: Partial<ExchangeConnection>) => {
     setConnections((prev) =>
@@ -156,20 +259,31 @@ export function useMultiExchangeWebSocket(threshold: number = 10000) {
           if (config.subscribe) {
             ws.send(JSON.stringify(config.subscribe));
           }
+
+          // Special handling for Hyperliquid - need multiple subscriptions
+          if (config.exchange === 'Hyperliquid') {
+            // Subscribe to user fills (global) - this catches liquidations
+            ws.send(JSON.stringify({
+              method: 'subscribe',
+              subscription: { type: 'trades', coin: 'BTC' },
+            }));
+          }
         };
 
         ws.onmessage = (event) => {
           try {
             const data = JSON.parse(event.data);
-            const liquidation = config.parse(data, threshold);
+            const liquidation = config.parse(data, thresholdRef.current);
 
             if (liquidation) {
               setLiquidations((prev) => {
+                // Dedupe by checking recent IDs
+                if (prev.some(l => l.id === liquidation.id)) return prev;
                 const updated = [liquidation, ...prev];
                 return updated.slice(0, MAX_LIQUIDATIONS);
               });
             }
-          } catch (e) {
+          } catch {
             // Silent parse errors
           }
         };
@@ -195,7 +309,7 @@ export function useMultiExchangeWebSocket(threshold: number = 10000) {
         updateConnection(config.exchange, { error: 'Failed to connect', isConnected: false });
       }
     },
-    [threshold, updateConnection]
+    [updateConnection]
   );
 
   const disconnectAll = useCallback(() => {
@@ -208,7 +322,9 @@ export function useMultiExchangeWebSocket(threshold: number = 10000) {
 
   const reconnectAll = useCallback(() => {
     disconnectAll();
-    EXCHANGES.forEach((config) => connectExchange(config));
+    setTimeout(() => {
+      EXCHANGES.forEach((config) => connectExchange(config));
+    }, 100);
   }, [connectExchange, disconnectAll]);
 
   const clearLiquidations = useCallback(() => {
@@ -219,15 +335,6 @@ export function useMultiExchangeWebSocket(threshold: number = 10000) {
     EXCHANGES.forEach((config) => connectExchange(config));
     return () => disconnectAll();
   }, [connectExchange, disconnectAll]);
-
-  // Reconnect when threshold changes
-  useEffect(() => {
-    // Only reconnect if already connected
-    const hasConnections = wsRefs.current.size > 0;
-    if (hasConnections) {
-      reconnectAll();
-    }
-  }, [threshold, reconnectAll]);
 
   return {
     liquidations,
