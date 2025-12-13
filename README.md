@@ -1,114 +1,156 @@
-<p align="center">
-  <img src="https://img.icons8.com/fluency/96/lightning-bolt.png" alt="BTC Liquidations" width="80" height="80">
-</p>
+<div align="center">
 
-<h1 align="center">BTC Liquidations</h1>
+# BTC Liquidations
 
-<p align="center">
-  <strong>Real-time Bitcoin liquidation monitor across major exchanges</strong>
-</p>
+<h3>Watch leveraged positions get liquidated in real-time.</h3>
 
-<p align="center">
+<p>
   <a href="https://btc-liquidations.vercel.app">
-    <img src="https://img.shields.io/badge/demo-live-brightgreen?style=for-the-badge" alt="Live Demo">
+    <img src="https://img.shields.io/badge/Live-btc--liquidations.vercel.app-orange?style=for-the-badge" alt="Live Demo" />
   </a>
-  <img src="https://img.shields.io/badge/next.js-16-black?style=for-the-badge&logo=next.js" alt="Next.js">
-  <img src="https://img.shields.io/badge/typescript-5-blue?style=for-the-badge&logo=typescript" alt="TypeScript">
-  <img src="https://img.shields.io/badge/tailwind-4-38bdf8?style=for-the-badge&logo=tailwindcss" alt="Tailwind">
 </p>
 
-<p align="center">
-  <a href="https://btc-liquidations.vercel.app">View Demo</a>
-  ·
-  <a href="https://github.com/bokiko/btc-liquidations/issues">Report Bug</a>
-  ·
-  <a href="https://github.com/bokiko/btc-liquidations/issues">Request Feature</a>
+<p>
+  <a href="https://btc-liquidations.vercel.app">
+    <img src="https://img.shields.io/badge/demo-live-success" alt="Live Demo" />
+  </a>
+  <a href="https://nextjs.org/">
+    <img src="https://img.shields.io/badge/Next.js-16-black" alt="Next.js" />
+  </a>
+  <a href="https://www.typescriptlang.org/">
+    <img src="https://img.shields.io/badge/TypeScript-5.0-blue" alt="TypeScript" />
+  </a>
+  <a href="https://tailwindcss.com/">
+    <img src="https://img.shields.io/badge/Tailwind-4.0-38bdf8" alt="Tailwind CSS" />
+  </a>
 </p>
+
+</div>
 
 ---
 
-## Overview
+## What is BTC Liquidations?
 
-BTC Liquidations is a real-time dashboard that monitors Bitcoin futures liquidations across multiple centralized and decentralized exchanges. Watch as leveraged positions get liquidated in real-time with detailed statistics and visualizations.
+**BTC Liquidations** is a real-time dashboard that monitors Bitcoin futures liquidations across 5 major exchanges - both centralized and decentralized. Watch as leveraged positions get wiped out with detailed statistics and visualizations.
+
+**No account needed. No ads. Just data.**
+
+---
+
+## Who is this for?
+
+| If you're a... | BTC Liquidations helps you... |
+|----------------|-------------------------------|
+| **Trader** | Spot large liquidation events that may signal price reversals |
+| **Whale Watcher** | Track big positions getting liquidated in real-time |
+| **Risk Manager** | Monitor market stress and leverage buildup |
+| **Researcher** | Analyze liquidation patterns across exchanges |
+| **Developer** | Connect to the same WebSocket feeds for your own tools |
+
+---
 
 ## Features
 
-- **Multi-Exchange Support** - Connects to 5 exchanges simultaneously
-  - CEX: Binance, Bybit, OKX
-  - DEX: Hyperliquid, Aevo
-- **Real-Time WebSocket Feeds** - Direct browser connections, no backend required
+### Multi-Exchange Support
+- **CEX**: Binance, Bybit, OKX
+- **DEX**: Hyperliquid, Aevo
+
+### Real-Time Data
+- **WebSocket Feeds** - Direct browser connections, no backend required
 - **Live Statistics** - Total liquidations, longs vs shorts, largest positions
 - **Interactive Charts** - Visualize liquidation volume over time
 - **Exchange Breakdown** - See which exchanges have the most activity
-- **Customizable Threshold** - Filter by minimum liquidation value ($1K - $100K)
+
+### Customization
+- **Adjustable Threshold** - Filter by minimum liquidation value ($1K - $100K)
 - **Auto-Reconnect** - Automatic reconnection on connection drops
 - **Responsive Design** - Works on desktop and mobile
 
-## Tech Stack
+---
 
-- **Framework**: [Next.js 16](https://nextjs.org/) with App Router
-- **Language**: [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: [Tailwind CSS 4](https://tailwindcss.com/)
-- **Charts**: [Recharts](https://recharts.org/)
-- **Icons**: [Lucide React](https://lucide.dev/)
-- **Date Handling**: [date-fns](https://date-fns.org/)
-- **Deployment**: [Vercel](https://vercel.com/)
+## Supported Exchanges
+
+| Exchange | Type | WebSocket Endpoint | Data |
+|----------|------|-------------------|------|
+| **Binance** | CEX | `wss://fstream.binance.com/ws/btcusdt@forceOrder` | Force orders |
+| **Bybit** | CEX | `wss://stream.bybit.com/v5/public/linear` | Liquidations |
+| **OKX** | CEX | `wss://ws.okx.com:8443/ws/v5/public` | Liquidation orders |
+| **Hyperliquid** | DEX | `wss://api.hyperliquid.xyz/ws` | Trades with liquidation flag |
+| **Aevo** | DEX | `wss://ws.aevo.xyz` | Trades with liquidation flag |
+
+---
+
+## Quick Links
+
+- **Live Dashboard**: [btc-liquidations.vercel.app](https://btc-liquidations.vercel.app)
+- **Report Issues**: [GitHub Issues](https://github.com/bokiko/btc-liquidations/issues)
+
+---
+
+# Technical Documentation
+
+<details>
+<summary><strong>Click to expand developer documentation</strong></summary>
 
 ## Getting Started
 
 ### Prerequisites
-
 - Node.js 18+
 - npm or yarn
 
 ### Installation
 
-1. Clone the repository
-   ```bash
-   git clone https://github.com/bokiko/btc-liquidations.git
-   cd btc-liquidations
-   ```
+```bash
+# Clone the repository
+git clone https://github.com/bokiko/btc-liquidations.git
+cd btc-liquidations
 
-2. Install dependencies
-   ```bash
-   npm install
-   ```
+# Install dependencies
+npm install
 
-3. Start the development server
-   ```bash
-   npm run dev
-   ```
+# Run the development server
+npm run dev
+```
 
-4. Open [http://localhost:3000](http://localhost:3000) in your browser
+Open [http://localhost:3000](http://localhost:3000) to view the dashboard.
+
+### Build for Production
+
+```bash
+npm run build
+npm start
+```
+
+## Tech Stack
+
+| Category | Technology |
+|----------|------------|
+| **Framework** | Next.js 16 (App Router) |
+| **Language** | TypeScript 5.0 |
+| **Styling** | Tailwind CSS 4.0 |
+| **Charts** | Recharts |
+| **Icons** | Lucide React |
+| **Dates** | date-fns |
+| **Deployment** | Vercel |
 
 ## Project Structure
 
 ```
 src/
 ├── app/
-│   ├── layout.tsx      # Root layout with metadata
-│   ├── page.tsx        # Main dashboard page
-│   └── globals.css     # Global styles
+│   ├── layout.tsx           # Root layout with metadata
+│   ├── page.tsx             # Main dashboard page
+│   └── globals.css          # Global styles
 ├── components/
-│   ├── ConnectionStatus.tsx   # Exchange connection indicators
-│   ├── LiquidationChart.tsx   # Volume chart component
-│   ├── LiquidationFeed.tsx    # Live feed list
-│   └── StatsCards.tsx         # Statistics cards
+│   ├── ConnectionStatus.tsx # Exchange connection indicators
+│   ├── LiquidationChart.tsx # Volume chart component
+│   ├── LiquidationFeed.tsx  # Live feed list
+│   └── StatsCards.tsx       # Statistics cards
 ├── hooks/
 │   └── useMultiExchangeWebSocket.ts  # WebSocket connection hook
 └── types/
-    └── index.ts        # TypeScript type definitions
+    └── index.ts             # TypeScript type definitions
 ```
-
-## WebSocket Endpoints
-
-| Exchange | Endpoint | Data |
-|----------|----------|------|
-| Binance | `wss://fstream.binance.com/ws/btcusdt@forceOrder` | Force orders |
-| Bybit | `wss://stream.bybit.com/v5/public/linear` | Liquidations |
-| OKX | `wss://ws.okx.com:8443/ws/v5/public` | Liquidation orders |
-| Hyperliquid | `wss://api.hyperliquid.xyz/ws` | Trades with liquidation flag |
-| Aevo | `wss://ws.aevo.xyz` | Trades with liquidation flag |
 
 ## Deployment
 
@@ -123,19 +165,31 @@ npm install -g vercel
 vercel --prod
 ```
 
+</details>
+
+---
+
 ## Contributing
 
-Contributions are welcome! Feel free to:
+Contributions welcome! Feel free to:
+- Add support for more exchanges
+- Improve UI/UX
+- Build new features
+- Fix bugs
 
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
+---
+
+## Team
+
+Built by [@bokiko](https://github.com/bokiko)
+
+---
 
 ## License
 
-This project is open source and available under the [MIT License](LICENSE).
+MIT License - see [LICENSE](LICENSE) file for details.
+
+---
 
 ## Disclaimer
 
@@ -143,6 +197,8 @@ This tool is for informational purposes only. Not financial advice. Trade at you
 
 ---
 
-<p align="center">
-  Built with mass liquidations
-</p>
+<div align="center">
+  <strong>Built for traders, by traders.</strong>
+  <br><br>
+  <a href="https://btc-liquidations.vercel.app">btc-liquidations.vercel.app</a>
+</div>
