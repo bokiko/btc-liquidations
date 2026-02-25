@@ -52,7 +52,7 @@
 ## Features
 
 ### Multi-Exchange Support
-- **CEX**: Binance, Bybit, OKX
+- **CEX**: Binance, Bybit, OKX and more
 - **DEX**: Hyperliquid, Aevo
 
 ### Real-Time Data
