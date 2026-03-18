@@ -33,7 +33,9 @@ export default function LiquidationChart({ liquidations }: LiquidationChartProps
       return acc;
     }, {} as Record<string, { time: string; longs: number; shorts: number }>);
 
-    return Object.values(grouped).slice(-20).reverse();
+    return Object.values(grouped)
+      .sort((a, b) => a.time.localeCompare(b.time))
+      .slice(-20);
   }, [liquidations]);
 
   const formatValue = (value: number) => {

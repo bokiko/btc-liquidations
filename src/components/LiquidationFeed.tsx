@@ -38,7 +38,7 @@ export default function LiquidationFeed({ liquidations }: LiquidationFeedProps) 
           </div>
           <p className="text-zinc-400 font-medium mb-1">Listening for liquidations</p>
           <p className="text-zinc-600 text-sm">
-            Connected to 5 exchanges
+            Monitoring multiple exchanges
           </p>
         </div>
       </div>

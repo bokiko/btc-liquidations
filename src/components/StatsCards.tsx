@@ -1,7 +1,7 @@
 'use client';
 
 import { Liquidation, Exchange, EXCHANGE_STYLES } from '@/types';
-import { TrendingUp, TrendingDown, Activity, DollarSign, Flame } from 'lucide-react';
+import { TrendingUp, TrendingDown, Activity, Flame } from 'lucide-react';
 
 interface StatsCardsProps {
   liquidations: Liquidation[];
