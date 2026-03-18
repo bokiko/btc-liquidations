@@ -4,7 +4,11 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { Liquidation, Exchange, ExchangeConnection } from '@/types';
 
 const MAX_LIQUIDATIONS = 200;
-const RECONNECT_DELAY = 3000;
+const RECONNECT_BASE_DELAY = 3000;
+const RECONNECT_MAX_DELAY = 60000;
+const MAX_MESSAGE_SIZE = 1024 * 1024; // 1MB guard against oversized payloads
+// Close codes that indicate we should not reconnect
+const NO_RECONNECT_CODES = new Set([1008, 1011, 4000, 4001, 4003]);
 
 interface WebSocketConfig {
   exchange: Exchange;
@@ -113,6 +117,9 @@ const EXCHANGES: WebSocketConfig[] = [
 
         if (valueUsd < threshold) continue;
 
+        const ts = parseInt(liq.ts);
+        if (!isFinite(ts)) continue;
+
         results.push({
           id: `okx-${liq.ts}-${liq.side}`,
           exchange: 'OKX',
@@ -121,7 +128,7 @@ const EXCHANGES: WebSocketConfig[] = [
           quantity,
           price,
           valueUsd,
-          timestamp: new Date(parseInt(liq.ts)),
+          timestamp: new Date(ts),
         });
       }
       return results;
@@ -239,6 +246,7 @@ export function useMultiExchangeWebSocket(threshold: number = 10000) {
 
   const wsRefs = useRef<Map<Exchange, WebSocket>>(new Map());
   const reconnectTimeouts = useRef<Map<Exchange, NodeJS.Timeout>>(new Map());
+  const reconnectAttempts = useRef<Map<Exchange, number>>(new Map());
   const thresholdRef = useRef(threshold);
 
   // Keep threshold ref updated
@@ -255,13 +263,14 @@ export function useMultiExchangeWebSocket(threshold: number = 10000) {
   const connectExchange = useCallback(
     (config: WebSocketConfig) => {
       const existing = wsRefs.current.get(config.exchange);
-      if (existing?.readyState === WebSocket.OPEN) return;
+      if (existing?.readyState === WebSocket.OPEN || existing?.readyState === WebSocket.CONNECTING) return;
 
       try {
         const ws = new WebSocket(config.url);
 
         ws.onopen = () => {
           console.log(`Connected to ${config.exchange}`);
+          reconnectAttempts.current.set(config.exchange, 0);
           updateConnection(config.exchange, { isConnected: true, error: null });
 
           if (config.subscribe) {
@@ -280,6 +289,7 @@ export function useMultiExchangeWebSocket(threshold: number = 10000) {
 
         ws.onmessage = (event) => {
           try {
+            if (typeof event.data === 'string' && event.data.length > MAX_MESSAGE_SIZE) return;
             const data = JSON.parse(event.data);
             const incoming = config.parse(data, thresholdRef.current);
 
@@ -300,16 +310,27 @@ export function useMultiExchangeWebSocket(threshold: number = 10000) {
           updateConnection(config.exchange, { error: 'Connection error' });
         };
 
-        ws.onclose = () => {
+        ws.onclose = (event) => {
           updateConnection(config.exchange, { isConnected: false });
-          console.log(`Disconnected from ${config.exchange}, reconnecting...`);
+
+          if (NO_RECONNECT_CODES.has(event.code)) {
+            console.log(`${config.exchange} closed with code ${event.code}, not reconnecting`);
+            updateConnection(config.exchange, { error: `Rejected (code ${event.code})` });
+            return;
+          }
+
+          const attempts = reconnectAttempts.current.get(config.exchange) || 0;
+          const delay = Math.min(RECONNECT_BASE_DELAY * Math.pow(2, attempts), RECONNECT_MAX_DELAY);
+          reconnectAttempts.current.set(config.exchange, attempts + 1);
+
+          console.log(`Disconnected from ${config.exchange}, reconnecting in ${delay}ms...`);
 
           const existingTimeout = reconnectTimeouts.current.get(config.exchange);
           if (existingTimeout) clearTimeout(existingTimeout);
 
           const timeout = setTimeout(() => {
             connectExchange(config);
-          }, RECONNECT_DELAY);
+          }, delay);
 
           reconnectTimeouts.current.set(config.exchange, timeout);
         };
@@ -326,6 +347,7 @@ export function useMultiExchangeWebSocket(threshold: number = 10000) {
   const disconnectAll = useCallback(() => {
     reconnectTimeouts.current.forEach((timeout) => clearTimeout(timeout));
     reconnectTimeouts.current.clear();
+    reconnectAttempts.current.clear();
 
     wsRefs.current.forEach((ws) => ws.close());
     wsRefs.current.clear();
