@@ -134,13 +134,13 @@ const EXCHANGES: WebSocketConfig[] = [
       return results;
     },
   },
-  // Hyperliquid - Subscribe to all trades and filter for liquidations
+  // Hyperliquid - Subscribe to trades and filter for liquidations
   {
     exchange: 'Hyperliquid',
     url: 'wss://api.hyperliquid.xyz/ws',
     subscribe: {
       method: 'subscribe',
-      subscription: { type: 'allMids' }, // We'll also subscribe to trades
+      subscription: { type: 'trades', coin: 'BTC' },
     },
     parse: (data: unknown, threshold: number) => {
       const msg = data as {
@@ -275,15 +275,6 @@ export function useMultiExchangeWebSocket(threshold: number = 10000) {
 
           if (config.subscribe) {
             ws.send(JSON.stringify(config.subscribe));
-          }
-
-          // Special handling for Hyperliquid - need multiple subscriptions
-          if (config.exchange === 'Hyperliquid') {
-            // Subscribe to user fills (global) - this catches liquidations
-            ws.send(JSON.stringify({
-              method: 'subscribe',
-              subscription: { type: 'trades', coin: 'BTC' },
-            }));
           }
         };
 

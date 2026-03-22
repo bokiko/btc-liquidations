@@ -39,3 +39,7 @@ yarn-error.log*
 # typescript
 *.tsbuildinfo
 next-env.d.ts
+
+# IDE / agent cache (leaks local paths)
+.claude/
+.kyzn/.improve.lock
